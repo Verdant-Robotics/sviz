@@ -301,6 +301,12 @@ export default class FoxgloveWebSocketPlayer implements Player {
       this.#supportedEncodings = event.supportedEncodings;
       this.#datatypes = new Map();
 
+      // serverStartTime will be NaN if no value or unparseable
+      const serverStartTime: number = parseInt(event.metadata?.["startTime"] ?? "");
+      if (!isNaN(serverStartTime)) {
+        this.#startTime = { sec: serverStartTime, nsec: 0 };
+      }
+
       // If the server publishes the time we clear any existing clockTime we might have and let the
       // server override
       if (this.#serverPublishesTime) {
