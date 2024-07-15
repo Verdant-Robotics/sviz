@@ -39,9 +39,9 @@
     "@foxglove/wasm-zstd": "1.0.1",
     "@mcap/core": "2.0.2",
     "@protobufjs/base64": "1.1.2",
+    "@verdant-robotics/cbuf": "2.0.0",
     "flatbuffers": "23.5.26",
     "flatbuffers_reflection": "0.0.7",
-    "protobufjs": "patch:protobufjs@7.2.4#../../patches/protobufjs.patch",
-    "wasm-cbuf": "2.5.1"
+    "protobufjs": "patch:protobufjs@7.2.4#../../patches/protobufjs.patch"
   }
 }
