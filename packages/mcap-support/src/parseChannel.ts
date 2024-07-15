@@ -2,7 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import Cbuf from "wasm-cbuf";
+import * as Cbuf from "@verdant-robotics/cbuf";
+import { CbufMessageDefinition } from "@verdant-robotics/cbuf/dist/types";
 
 import { MessageDefinition, MessageDefinitionField } from "@foxglove/message-definition";
 import { IDLMessageDefinition, parseIDL } from "@foxglove/omgidl-parser";
@@ -72,12 +73,12 @@ function parsedDefinitionsToDatatypes(
   return datatypes;
 }
 
-function parseCBufSchema(schema: string): ReturnType<typeof Cbuf.parseCBufSchema> {
+function parseCBufSchema(schema: string): CbufMessageDefinition[] | Error {
   try {
-    return Cbuf.parseCBufSchema(schema);
+    const stripped = Cbuf.preprocessSchema(schema);
+    return Cbuf.parseSchema(stripped);
   } catch (unk) {
-    const e = unk as Error;
-    return { error: e.message, schema: new Map() };
+    return unk as Error;
   }
 }
 
@@ -233,24 +234,31 @@ export function parseChannel(
     }
     const schema = new TextDecoder().decode(channel.schema.data);
     const res = parseCBufSchema(schema);
-    if (res.error) {
-      throw new Error(`Error parsing cbuf schema: ${res.error}\n\n${schema}`);
+    if (res instanceof Error) {
+      throw new Error(`Error parsing cbuf schema: ${res.message}\n\n${schema}`);
     }
-    const schemaMap = res.schema;
-    const hashMap = Cbuf.schemaMapToHashMap(schemaMap);
+    const [schemaMap, hashMap] = Cbuf.createSchemaMaps(res);
 
-    // For each schemaMap key that contains a `::` separator, add new entries to
-    // `schemaMap` with the same value as the original key, but with the `::`
-    // replaced by `.` and `/`
-    for (const [key, value] of Array.from(schemaMap.entries())) {
-      if (key.includes("::")) {
-        schemaMap.set(key.replace(/::/g, "."), value);
-        schemaMap.set(key.replace(/::/g, "/"), value);
+    // All namespaces in cbuf use `::` as a separator. Fix this for Foxglove and ROS types
+    for (const [typeName, msgdef] of Array.from(schemaMap.entries())) {
+      if (typeName.includes("::")) {
+        const addToMap = (newKey: string) => {
+          const newValue = structuredClone(msgdef);
+          newValue.name = newKey;
+          schemaMap.set(newKey, newValue);
+        };
+        if (typeName.startsWith("foxglove::")) {
+          // Foxglove types use `.` as a separator
+          addToMap(typeName.replace(/::/g, "."));
+        } else if (!typeName.startsWith("messages::")) {
+          // ROS types use `/` as a separator
+          addToMap(typeName.replace(/::/g, "/"));
+        }
       }
     }
 
     return {
-      datatypes: res.schema,
+      datatypes: schemaMap,
       deserialize: (data) => Cbuf.deserializeMessage(schemaMap, hashMap, data, 0).message,
     };
   }

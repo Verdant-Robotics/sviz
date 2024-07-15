@@ -2355,11 +2355,11 @@ __metadata:
     "@mcap/core": 2.0.2
     "@protobufjs/base64": 1.1.2
     "@types/protobufjs": "workspace:*"
+    "@verdant-robotics/cbuf": 2.0.0
     flatbuffers: 23.5.26
     flatbuffers_reflection: 0.0.7
     protobufjs: "patch:protobufjs@7.2.4#../../patches/protobufjs.patch"
     typescript: 5.3.3
-    wasm-cbuf: 2.5.1
   languageName: unknown
   linkType: soft
 
@@ -2608,6 +2608,7 @@ __metadata:
     "@types/uuid": 9.0.7
     "@types/wicg-file-system-access": 2020.9.6
     "@uiw/react-textarea-code-editor": 3.0.2
+    "@verdant-robotics/cbuf": 2.0.0
     async-mutex: 0.4.0
     babel-jest: 29.7.0
     babel-plugin-transform-import-meta: 2.2.1
@@ -2696,7 +2697,6 @@ __metadata:
     use-debounce: 10.0.0
     use-immer: 0.9.0
     uuid: 9.0.1
-    wasm-cbuf: 2.5.1
     webpack: 5.90.1
     zustand: 4.5.0
   languageName: unknown
@@ -7151,6 +7151,15 @@ __metadata:
   version: 1.2.0
   resolution: "@ungap/structured-clone@npm:1.2.0"
   checksum: 4f656b7b4672f2ce6e272f2427d8b0824ed11546a601d8d5412b9d7704e83db38a8d9f402ecdf2b9063fc164af842ad0ec4a55819f621ed7e7ea4d1efcc74524
+  languageName: node
+  linkType: hard
+
+"@verdant-robotics/cbuf@npm:2.0.0":
+  version: 2.0.0
+  resolution: "@verdant-robotics/cbuf@npm:2.0.0"
+  dependencies:
+    "@foxglove/message-definition": ^0.3.1
+  checksum: 1731a24aa423f0717e4057b11e1563a2d94ec159ef28f0aac80b5b8ec1420605214a900e90574b8c97c1d0a19b4f25c5813e61e94df41d24e5d0c02589025f09
   languageName: node
   linkType: hard
 
@@ -20963,15 +20972,6 @@ __metadata:
   dependencies:
     makeerror: 1.0.12
   checksum: ad7a257ea1e662e57ef2e018f97b3c02a7240ad5093c392186ce0bcf1f1a60bbadd520d073b9beb921ed99f64f065efb63dfc8eec689a80e569f93c1c5d5e16c
-  languageName: node
-  linkType: hard
-
-"wasm-cbuf@npm:2.5.1":
-  version: 2.5.1
-  resolution: "wasm-cbuf@npm:2.5.1"
-  dependencies:
-    "@foxglove/message-definition": ^0.3.1
-  checksum: 9bab7bd52d4ebdd5124a3b918a03906c6133550b566d2ab529fb1c2f8d9023ccbd2c3c63f2e496112e08ac6b3914c8b42fe5ef668d60b4ea72dcac8b7c3b7b93
   languageName: node
   linkType: hard
 
