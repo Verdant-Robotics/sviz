@@ -37,6 +37,7 @@ function typeForSimpleField(type: BaseType): string {
     case BaseType.String:
       return "string";
     case BaseType.Vector:
+    case BaseType.Vector64:
     case BaseType.Obj:
     case BaseType.Union:
     case BaseType.Array:

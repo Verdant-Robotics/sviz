@@ -5,8 +5,8 @@
   "main": "./src/index.tsx",
   "dependencies": {
     "@foxglove/studio-base": "workspace:*",
-    "@sentry/browser": "7.111.0",
-    "@sentry/webpack-plugin": "2.16.1"
+    "@sentry/browser": "8.26.0",
+    "@sentry/webpack-plugin": "2.22.2"
   },
   "devDependencies": {
     "@fluentui/react-icons": "2.0.227",
@@ -24,7 +24,7 @@
     "react-dom": "18.2.0",
     "react-i18next": "14.0.5",
     "tss-react": "4.9.3",
-    "webpack": "5.90.1",
-    "webpack-dev-server": "4.15.1"
+    "webpack": "5.93.0",
+    "webpack-dev-server": "4.15.2"
   }
 }
