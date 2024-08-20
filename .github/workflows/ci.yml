@@ -45,17 +45,17 @@ jobs:
     name: ${{ matrix.config.name }} (${{ matrix.os }})
 
     steps:
-      - uses: actions/checkout@v4.1.1
+      - uses: actions/checkout@v4
         with:
           lfs: true
 
-      - uses: actions/setup-node@v4.0.2
+      - uses: actions/setup-node@v4
         with:
-          node-version: 16.17
+          node-version: 22
       - run: corepack enable yarn
 
       - name: Restore cache
-        uses: actions/cache@v4.0.1
+        uses: actions/cache@v4
         with:
           path: |
             .yarn/cache
@@ -78,17 +78,17 @@ jobs:
     name: integration (${{ matrix.os }})
 
     steps:
-      - uses: actions/checkout@v4.1.1
+      - uses: actions/checkout@v4
         with:
           lfs: true
 
-      - uses: actions/setup-node@v4.0.2
+      - uses: actions/setup-node@v4
         with:
-          node-version: 16.17
+          node-version: 22
       - run: corepack enable yarn
 
       - name: Restore cache
-        uses: actions/cache@v4.0.1
+        uses: actions/cache@v4
         with:
           path: |
             .yarn/cache
@@ -118,17 +118,17 @@ jobs:
       SENTRY_CURRENT_COMMIT: ${{ github.sha }}
       SENTRY_REPO: ${{ github.repository }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           lfs: true
 
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
-          node-version: 16.17
+          node-version: 22
       - run: corepack enable yarn
 
       - name: Restore cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             .yarn/cache
@@ -151,20 +151,20 @@ jobs:
 
       - name: Generate Docker tags
         id: meta
-        uses: docker/metadata-action@v4
+        uses: docker/metadata-action@v5
         with:
           images: ghcr.io/${{ github.repository }}
           tags: |
             type=raw,value=latest,public=true
 
       - name: Configure QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
 
       - name: Configure Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       - name: Build and push
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./Dockerfile.ci
