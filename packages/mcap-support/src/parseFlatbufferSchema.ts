@@ -97,8 +97,10 @@ function typeForField(schema: SchemaT, field: FieldT): MessageDefinitionField[] 
       break;
     }
     case BaseType.Vector:
+    case BaseType.Vector64:
       switch (field.type.element) {
         case BaseType.Vector:
+        case BaseType.Vector64:
         case BaseType.Union:
         case BaseType.Array:
         case BaseType.None:
