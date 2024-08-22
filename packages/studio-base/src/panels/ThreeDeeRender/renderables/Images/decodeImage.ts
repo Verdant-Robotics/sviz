@@ -29,6 +29,9 @@ export async function decodeCompressedImageToBitmap(
   image: CompressedImageTypes,
   resizeWidth?: number,
 ): Promise<ImageBitmap> {
+  if ("image" in image) {
+    return await decodeCompressedImageToBitmap(image.image, resizeWidth);
+  }
   const bitmapData = new Blob([image.data], { type: `image/${image.format}` });
   return await createImageBitmap(bitmapData, { resizeWidth });
 }

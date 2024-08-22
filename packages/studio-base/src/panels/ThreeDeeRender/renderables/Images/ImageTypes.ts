@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 import { Time } from "@foxglove/rostime";
-import { CompressedImage, RawImage } from "@foxglove/schemas";
+import { CompressedImage, ImageAnnotations, RawImage } from "@foxglove/schemas";
 import { CAMERA_CALIBRATION_DATATYPES } from "@foxglove/studio-base/panels/ThreeDeeRender/foxglove";
 
 import {
@@ -16,12 +16,25 @@ export const ALL_CAMERA_INFO_SCHEMAS = new Set([
   ...CAMERA_CALIBRATION_DATATYPES,
 ]);
 
-export type CompressedImageTypes = RosCompressedImage | CompressedImage;
+/** A compressed image with annotations */
+export type CompressedAnnotatedImage = {
+  image: CompressedImage;
+  annotations: ImageAnnotations;
+};
 
-export type AnyImage = RosImage | RosCompressedImage | RawImage | CompressedImage;
+export type CompressedImageTypes = RosCompressedImage | CompressedImage | CompressedAnnotatedImage;
+
+export type AnyImage =
+  | RosImage
+  | RosCompressedImage
+  | RawImage
+  | CompressedImage
+  | CompressedAnnotatedImage;
 
 export function getFrameIdFromImage(image: AnyImage): string {
-  if ("header" in image) {
+  if ("image" in image) {
+    return getFrameIdFromImage(image.image);
+  } else if ("header" in image) {
     return image.header.frame_id;
   } else {
     return image.frame_id;
@@ -29,7 +42,9 @@ export function getFrameIdFromImage(image: AnyImage): string {
 }
 
 export function getTimestampFromImage(image: AnyImage): Time {
-  if ("header" in image) {
+  if ("image" in image) {
+    return getTimestampFromImage(image.image);
+  } else if ("header" in image) {
     return image.header.stamp;
   } else {
     return image.timestamp;

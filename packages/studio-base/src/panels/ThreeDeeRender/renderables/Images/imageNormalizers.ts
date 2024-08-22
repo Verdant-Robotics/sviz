@@ -2,8 +2,9 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { CompressedImage, RawImage } from "@foxglove/schemas";
+import { CompressedImage, ImageAnnotations, RawImage } from "@foxglove/schemas";
 import { PartialMessage } from "@foxglove/studio-base/panels/ThreeDeeRender/SceneExtension";
+import { CompressedAnnotatedImage } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/Images/ImageTypes";
 
 import { normalizeByteArray, normalizeHeader, normalizeTime } from "../../normalizeMessages";
 import { Image as RosImage, CompressedImage as RosCompressedImage } from "../../ros";
@@ -63,5 +64,19 @@ export function normalizeCompressedImage(
     frame_id: message.frame_id ?? "",
     format: message.format ?? "",
     data: normalizeByteArray(message.data),
+  };
+}
+
+export function normalizeCompressedAnnotatedImage(
+  message: PartialMessage<CompressedAnnotatedImage>,
+): CompressedAnnotatedImage {
+  const annotations = (message.annotations ?? {
+    circles: [],
+    points: [],
+    texts: [],
+  }) as ImageAnnotations;
+  return {
+    image: normalizeCompressedImage(message.image ?? {}),
+    annotations,
   };
 }

@@ -34,6 +34,7 @@ import {
 import {
   AnyImage,
   getFrameIdFromImage,
+  getTimestampFromImage,
 } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/Images/ImageTypes";
 import { IMAGE_DEFAULT_COLOR_MODE_SETTINGS } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/Images/decodeImage";
 import {
@@ -63,6 +64,7 @@ import { PartialMessageEvent, SceneExtension } from "../../SceneExtension";
 import { SettingsTreeEntry } from "../../SettingsManager";
 import {
   CAMERA_CALIBRATION_DATATYPES,
+  COMPRESSED_ANNOTATED_IMAGE_DATATYPES,
   COMPRESSED_IMAGE_DATATYPES,
   RAW_IMAGE_DATATYPES,
 } from "../../foxglove";
@@ -108,6 +110,7 @@ export const ALL_SUPPORTED_IMAGE_SCHEMAS = new Set([
   ...ROS_COMPRESSED_IMAGE_DATATYPES,
   ...RAW_IMAGE_DATATYPES,
   ...COMPRESSED_IMAGE_DATATYPES,
+  ...COMPRESSED_ANNOTATED_IMAGE_DATATYPES,
 ]);
 
 const SUPPORTED_RAW_IMAGE_SCHEMAS = new Set([...RAW_IMAGE_DATATYPES, ...ROS_IMAGE_DATATYPES]);
@@ -287,6 +290,15 @@ export class ImageMode
         schemaNames: COMPRESSED_IMAGE_DATATYPES,
         subscription: {
           handler: this.messageHandler.handleCompressedImage,
+          shouldSubscribe: this.imageShouldSubscribe,
+          filterQueue: this.#filterMessageQueue.bind(this),
+        },
+      },
+      {
+        type: "schema",
+        schemaNames: COMPRESSED_ANNOTATED_IMAGE_DATATYPES,
+        subscription: {
+          handler: this.messageHandler.handleCompressedAnnotatedImage,
           shouldSubscribe: this.imageShouldSubscribe,
           filterQueue: this.#filterMessageQueue.bind(this),
         },
@@ -700,7 +712,7 @@ export class ImageMode
   #handleImageChange = (messageEvent: PartialMessageEvent<AnyImage>, image: AnyImage): void => {
     const topic = messageEvent.topic;
     const receiveTime = toNanoSec(messageEvent.receiveTime);
-    const frameId = "header" in image ? image.header.frame_id : image.frame_id;
+    const frameId = getFrameIdFromImage(image);
 
     if (this.#removeImageTimeout != undefined) {
       clearTimeout(this.#removeImageTimeout);
@@ -778,9 +790,10 @@ export class ImageMode
       // planarProjectionFactor must be 1 to avoid imprecise projection due to small number of grid subdivisions
       planarProjectionFactor: 1,
     };
+    const messageTime = image ? toNanoSec(getTimestampFromImage(image)) : 0n;
     renderable = this.initRenderable(topicName, {
       receiveTime,
-      messageTime: image ? toNanoSec("header" in image ? image.header.stamp : image.timestamp) : 0n,
+      messageTime,
       frameId: this.renderer.normalizeFrameId(frameId),
       pose: makePose(),
       settingsPath: IMAGE_TOPIC_PATH,
@@ -965,7 +978,7 @@ export class ImageMode
       }
       const settings = this.getImageModeSettings();
       const { rotation, flipHorizontal, flipVertical } = settings;
-      const stamp = "header" in imageMessage ? imageMessage.header.stamp : imageMessage.timestamp;
+      const stamp = getTimestampFromImage(imageMessage);
       try {
         const width =
           rotation === 90 || rotation === 270 ? currentImage.height : currentImage.width;

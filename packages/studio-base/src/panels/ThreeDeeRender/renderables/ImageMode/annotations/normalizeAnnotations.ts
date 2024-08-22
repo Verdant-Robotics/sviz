@@ -249,4 +249,4 @@ function getAnnotationAtPath(message: unknown, path: PathKey[]): RosObject {
   return value as RosObject;
 }
 
-export { normalizeAnnotations, getAnnotationAtPath };
+export { normalizeAnnotations, normalizeFoxgloveImageAnnotations, getAnnotationAtPath };
