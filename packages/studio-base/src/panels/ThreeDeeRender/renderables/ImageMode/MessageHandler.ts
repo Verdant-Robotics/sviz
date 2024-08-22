@@ -25,10 +25,12 @@ import {
 import { ImageModeConfig } from "@foxglove/studio-base/panels/ThreeDeeRender/IRenderer";
 import {
   AnyImage,
+  CompressedAnnotatedImage,
   getTimestampFromImage,
 } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/Images/ImageTypes";
 import {
   normalizeCompressedImage,
+  normalizeCompressedAnnotatedImage,
   normalizeRawImage,
   normalizeRosCompressedImage,
   normalizeRosImage,
@@ -200,6 +202,23 @@ export class MessageHandler implements IMessageHandler {
 
   public handleCompressedImage = (messageEvent: PartialMessageEvent<CompressedImage>): void => {
     this.handleImage(messageEvent, normalizeCompressedImage(messageEvent.message));
+  };
+
+  public handleCompressedAnnotatedImage = (
+    messageEvent: PartialMessageEvent<CompressedAnnotatedImage>,
+  ): void => {
+    const normalized = normalizeCompressedAnnotatedImage(messageEvent.message);
+    const annotationsEvent = {
+      topic: messageEvent.topic,
+      schemaName: "foxglove.ImageAnnotations",
+      receiveTime: messageEvent.receiveTime,
+      publishTime: messageEvent.publishTime,
+      message: normalized.annotations,
+      sizeInBytes: messageEvent.sizeInBytes,
+      originalMessageEvent: messageEvent,
+    };
+    this.handleAnnotations(annotationsEvent);
+    this.handleImage(messageEvent, normalized);
   };
 
   protected handleImage(message: PartialMessageEvent<AnyImage>, image: AnyImage): void {
@@ -449,6 +468,9 @@ export interface IMessageHandler {
   handleRosCompressedImage: (messageEvent: PartialMessageEvent<RosCompressedImage>) => void;
   handleRawImage: (messageEvent: PartialMessageEvent<RawImage>) => void;
   handleCompressedImage: (messageEvent: PartialMessageEvent<CompressedImage>) => void;
+  handleCompressedAnnotatedImage: (
+    messageEvent: PartialMessageEvent<CompressedAnnotatedImage>,
+  ) => void;
   handleCameraInfo: (message: PartialMessageEvent<CameraInfo>) => void;
   handleAnnotations: (
     messageEvent: MessageEvent<FoxgloveImageAnnotations | RosImageMarker | RosImageMarkerArray>,

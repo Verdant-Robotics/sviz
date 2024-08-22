@@ -16,7 +16,7 @@ import { WorkerImageDecoder } from "@foxglove/studio-base/panels/ThreeDeeRender/
 import { projectPixel } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/projections";
 import { RosValue } from "@foxglove/studio-base/players/types";
 
-import { AnyImage } from "./ImageTypes";
+import { AnyImage, getFrameIdFromImage, getTimestampFromImage } from "./ImageTypes";
 import { decodeCompressedImageToBitmap } from "./decodeImage";
 import { CameraInfo } from "../../ros";
 import { DECODE_IMAGE_ERR_KEY, IMAGE_TOPIC_PATH } from "../ImageMode/constants";
@@ -107,12 +107,10 @@ export class ImageRenderable extends Renderable<ImageUserData> {
     //
     // If there is no camera info, we fall back to the image's frame
     const image = this.userData.image;
-    const rawFrameId =
-      this.userData.cameraInfo?.header.frame_id ??
-      ("header" in image ? image.header.frame_id : image.frame_id);
+    const rawFrameId = this.userData.cameraInfo?.header.frame_id ?? getFrameIdFromImage(image);
     this.userData.frameId =
       typeof rawFrameId === "string" ? this.renderer.normalizeFrameId(rawFrameId) : rawFrameId;
-    this.userData.messageTime = toNanoSec("header" in image ? image.header.stamp : image.timestamp);
+    this.userData.messageTime = toNanoSec(getTimestampFromImage(image));
   }
 
   public override details(): Record<string, RosValue> {
@@ -231,7 +229,9 @@ export class ImageRenderable extends Renderable<ImageUserData> {
     image: AnyImage,
     resizeWidth?: number,
   ): Promise<ImageBitmap | ImageData> {
-    if ("format" in image) {
+    if ("image" in image) {
+      return await this.decodeImage(image.image, resizeWidth);
+    } else if ("format" in image) {
       return await decodeCompressedImageToBitmap(image, resizeWidth);
     }
     return await (this.decoder ??= new WorkerImageDecoder()).decode(image, this.userData.settings);

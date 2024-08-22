@@ -18,9 +18,16 @@ import {
   ImageRenderable,
   ImageUserData,
 } from "./Images/ImageRenderable";
-import { ALL_CAMERA_INFO_SCHEMAS, AnyImage } from "./Images/ImageTypes";
+import {
+  ALL_CAMERA_INFO_SCHEMAS,
+  AnyImage,
+  CompressedAnnotatedImage,
+  getFrameIdFromImage,
+  getTimestampFromImage,
+} from "./Images/ImageTypes";
 import {
   normalizeCompressedImage,
+  normalizeCompressedAnnotatedImage,
   normalizeRawImage,
   normalizeRosCompressedImage,
   normalizeRosImage,
@@ -32,6 +39,7 @@ import { PartialMessageEvent, SceneExtension, onlyLastByTopicMessage } from "../
 import { SettingsTreeEntry } from "../SettingsManager";
 import {
   CAMERA_CALIBRATION_DATATYPES,
+  COMPRESSED_ANNOTATED_IMAGE_DATATYPES,
   COMPRESSED_IMAGE_DATATYPES,
   RAW_IMAGE_DATATYPES,
 } from "../foxglove";
@@ -129,6 +137,14 @@ export class Images extends SceneExtension<ImageRenderable> {
         schemaNames: COMPRESSED_IMAGE_DATATYPES,
         subscription: {
           handler: this.#handleCompressedImage,
+          filterQueue: onlyLastByTopicMessage,
+        },
+      },
+      {
+        type: "schema",
+        schemaNames: COMPRESSED_ANNOTATED_IMAGE_DATATYPES,
+        subscription: {
+          handler: this.#handleCompressedAnnotatedImage,
           filterQueue: onlyLastByTopicMessage,
         },
       },
@@ -300,10 +316,16 @@ export class Images extends SceneExtension<ImageRenderable> {
     this.handleImage(messageEvent, normalizeCompressedImage(messageEvent.message));
   };
 
+  #handleCompressedAnnotatedImage = (
+    messageEvent: PartialMessageEvent<CompressedAnnotatedImage>,
+  ): void => {
+    this.handleImage(messageEvent, normalizeCompressedAnnotatedImage(messageEvent.message));
+  };
+
   protected handleImage = (messageEvent: PartialMessageEvent<AnyImage>, image: AnyImage): void => {
     const imageTopic = messageEvent.topic;
     const receiveTime = toNanoSec(messageEvent.receiveTime);
-    const frameId = "header" in image ? image.header.frame_id : image.frame_id;
+    const frameId = getFrameIdFromImage(image);
 
     const renderable = this.#getImageRenderable(imageTopic, receiveTime, image, frameId);
 
@@ -435,9 +457,11 @@ export class Images extends SceneExtension<ImageRenderable> {
       | Partial<LayerSettingsImage>
       | undefined;
 
+    const messageTime = image ? toNanoSec(getTimestampFromImage(image)) : 0n;
+
     renderable = this.initRenderable(imageTopic, {
       receiveTime,
-      messageTime: image ? toNanoSec("header" in image ? image.header.stamp : image.timestamp) : 0n,
+      messageTime,
       frameId: this.renderer.normalizeFrameId(frameId),
       pose: makePose(),
       settingsPath: ["topics", imageTopic],

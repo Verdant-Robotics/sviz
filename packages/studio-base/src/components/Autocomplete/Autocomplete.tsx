@@ -139,16 +139,21 @@ export const Autocomplete = React.forwardRef(function Autocomplete(
   }, [items]);
 
   const fzf = useMemo(() => {
-    return new Fzf(items, {
-      // v1 algorithm is significantly faster on long lists of items.
-      fuzzy: items.length > FAST_FIND_ITEM_CUTOFF ? "v1" : "v2",
-      sort: sortWhenFiltering,
-      limit: MAX_FZF_MATCHES,
-    });
+    try {
+      return new Fzf(items, {
+        // v1 algorithm is significantly faster on long lists of items.
+        fuzzy: items.length > FAST_FIND_ITEM_CUTOFF ? "v1" : "v2",
+        sort: sortWhenFiltering,
+        limit: MAX_FZF_MATCHES,
+      });
+    } catch (e) {
+      console.error(`Error creating Fzf instance: ${e}`);
+      return undefined;
+    }
   }, [items, sortWhenFiltering]);
 
   const autocompleteItems = useMemo(() => {
-    return filterText ? fzf.find(filterText) : fzfUnfiltered;
+    return filterText && fzf ? fzf.find(filterText) : fzfUnfiltered;
   }, [filterText, fzf, fzfUnfiltered]);
 
   const hasError = props.hasError ?? (autocompleteItems.length === 0 && value?.length !== 0);
