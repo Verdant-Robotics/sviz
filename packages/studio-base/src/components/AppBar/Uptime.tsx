@@ -51,10 +51,13 @@ function formatDurationCustom(duration: number) {
 
   // Build the format string based on the duration values
   let formatString = "";
-  if (dur.hours() > 0) {
+  if (dur.days() > 0) {
+    formatString += "d[d] ";
+  }
+  if (dur.days() > 0 || dur.hours() > 0) {
     formatString += "h[h] ";
   }
-  if (dur.hours() > 0 || dur.minutes() > 0) {
+  if (dur.days() > 0 || dur.hours() > 0 || dur.minutes() > 0) {
     formatString += "m[m] ";
   }
   formatString += "s[s]";
