@@ -1,7 +1,3 @@
-// This Source Code Form is subject to the terms of the Mozilla Public
-// License, v2.0. If a copy of the MPL was not distributed with this
-// file, You can obtain one at http://mozilla.org/MPL/2.0/
-
 import * as Sentry from "@sentry/browser";
 import { StrictMode, useEffect } from "react";
 import ReactDOM from "react-dom";
@@ -10,7 +6,6 @@ import Logger from "@foxglove/log";
 import { setReportErrorHandler, type IDataSourceFactory } from "@foxglove/studio-base";
 import CssBaseline from "@foxglove/studio-base/components/CssBaseline";
 
-import { CompatibilityBanner } from "./CompatibilityBanner";
 import { canRenderApp } from "./canRenderApp";
 
 const log = Logger.getLogger(__filename);
@@ -66,25 +61,14 @@ export async function main(getParams: () => Promise<MainParams> = async () => ({
     throw new Error("missing #root element");
   }
 
-  const chromeMatch = navigator.userAgent.match(/Chrome\/(\d+)\./);
-  const chromeVersion = chromeMatch ? parseInt(chromeMatch[1] ?? "", 10) : 0;
-  const isChrome = chromeVersion !== 0;
-
   const canRender = canRenderApp();
-  const banner = (
-    <CompatibilityBanner
-      isChrome={isChrome}
-      currentVersion={chromeVersion}
-      isDismissable={canRender}
-    />
-  );
 
   if (!canRender) {
     // eslint-disable-next-line react/no-deprecated
     ReactDOM.render(
       <StrictMode>
         <LogAfterRender>
-          <CssBaseline>{banner}</CssBaseline>
+          <CssBaseline />
         </LogAfterRender>
       </StrictMode>,
       rootEl,
@@ -114,7 +98,6 @@ export async function main(getParams: () => Promise<MainParams> = async () => ({
   ReactDOM.render(
     <StrictMode>
       <LogAfterRender>
-        {banner}
         {rootElement}
       </LogAfterRender>
     </StrictMode>,
