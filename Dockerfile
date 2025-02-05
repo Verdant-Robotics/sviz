@@ -22,7 +22,7 @@ COPY <<EOF /etc/caddy/Caddyfile
 }
 
 {env.ROBOT_NAME}.{env.DOMAIN_NAME} {
-    tls /etc/ssl/{env.ROBOT_NAME}.{env.DOMAIN_NAME} /etc/ssl/{env.ROBOT_NAME}.{env.DOMAIN_NAME}.key
+    tls /etc/ssl/cert.crt /etc/ssl/cert.key
     root * /app
     file_server
 }
