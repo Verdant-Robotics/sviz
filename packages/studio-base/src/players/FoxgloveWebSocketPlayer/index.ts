@@ -1403,7 +1403,7 @@ function statusLevelToProblemSeverity(level: StatusLevel): PlayerProblem["severi
 
 // Converts shorthand and fully qualified WebSocket URLs to a normalized form
 export function normalizeWsUrl(input: string): string {
-  const defaultScheme = "ws://";
+  const defaultScheme = "wss://";
   const defaultPort = "8765";
   let scheme = defaultScheme;
   let port = defaultPort;
