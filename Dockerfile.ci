@@ -7,18 +7,7 @@ COPY web/.webpack ./
 
 EXPOSE 80 443
 
-# Configure Caddy with HTTP to HTTPS redirect and TLS
-COPY <<EOF /etc/caddy/Caddyfile
-:80 {
-    redir https://{env.ROBOT_NAME}.{env.DOMAIN_NAME}{uri} permanent
-}
-
-{env.ROBOT_NAME}.{env.DOMAIN_NAME} {
-    tls /etc/ssl/cert.crt /etc/ssl/cert.key
-    root * /app
-    file_server
-}
-EOF
+# NOTE: We expect /etc/caddy/Caddyfile to be mounted as a volume
 
 COPY <<EOF /entrypoint.sh
 # Optionally override the default layout with one provided via bind mount
